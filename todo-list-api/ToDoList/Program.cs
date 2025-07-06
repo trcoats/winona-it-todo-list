@@ -10,10 +10,14 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("test", policy => policy.WithOrigins("http://localhost:5173"));
+});
 
-builder.Services.AddSingleton<ToDoListInMemoryDbContext>();
-builder.Services.AddSingleton<IToDoListRepository, ToDoListRepository>();
-builder.Services.AddSingleton<IToDoListService, ToDoListService>();
+builder.Services.AddDbContext<ToDoListInMemoryDbContext>();
+builder.Services.AddScoped<IToDoListRepository, ToDoListRepository>();
+builder.Services.AddScoped<IToDoListService, ToDoListService>();
 
 var app = builder.Build();
 
@@ -25,6 +29,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseCors("test");
 
 app.UseAuthorization();
 
