@@ -12,7 +12,12 @@ builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("test", policy => policy.WithOrigins("http://localhost:5173"));
+    options.AddDefaultPolicy(policy =>
+    {
+        policy.WithOrigins("http://localhost:5173");
+        policy.AllowAnyHeader();
+        policy.AllowAnyMethod();
+    });
 });
 
 builder.Services.AddDbContext<ToDoListInMemoryDbContext>();
@@ -30,7 +35,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.UseCors("test");
+app.UseCors();
 
 app.UseAuthorization();
 

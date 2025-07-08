@@ -1,0 +1,6 @@
+@import "tailwindcss";
+
+.modal {
+  position: absolute;
+  z-index: 99;
+}
