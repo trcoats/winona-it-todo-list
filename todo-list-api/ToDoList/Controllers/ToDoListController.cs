@@ -22,22 +22,22 @@ public class ToDoListController : ControllerBase
     }
 
     [HttpPost]
-    public IActionResult AddToDoListItem([FromBody] CreateToDoListItemModel item)
+    public async Task<IActionResult> AddToDoListItem([FromBody] CreateToDoListItemModel item)
     {
-        _toDoListService.AddToDoListItem(item);
-        return Ok();
+        var newId = await _toDoListService.AddToDoListItem(item);
+        return Ok(newId);
     }
 
     [HttpPatch("complete/{id}")]
-    public IActionResult MarkToDoItemCompleted(Guid id)
+    public async Task<IActionResult> MarkToDoItemCompleted(Guid id)
     {
-        _toDoListService.MarkToDoListItemCompleted(id);
+        await _toDoListService.MarkToDoListItemCompleted(id);
         return Ok();
     }
 
     [HttpDelete("{id}")]
-    public IActionResult DeleteToDoListItem(Guid id) {
-        _toDoListService.DeleteToDoListItemById(id);
+    public async Task<IActionResult> DeleteToDoListItem(Guid id) {
+        await _toDoListService.DeleteToDoListItemById(id);
         return Ok();
     }
 }

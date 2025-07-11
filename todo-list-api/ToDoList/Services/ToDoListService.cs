@@ -19,11 +19,12 @@ public class ToDoListService : IToDoListService
         return _toDoListRepository.GetToDoListItems();
     }
 
-    public Task<bool> AddToDoListItem(CreateToDoListItemModel item)
+    public async Task<string> AddToDoListItem(CreateToDoListItemModel item)
     {
         var toDoListItemEntity = new ToDoListItem(item);
 
-        return _toDoListRepository.AddToDoListItem(toDoListItemEntity);
+        await _toDoListRepository.AddToDoListItem(toDoListItemEntity);
+        return toDoListItemEntity.Id.ToString();
     }
 
     public async Task<bool> MarkToDoListItemCompleted(Guid id)

@@ -1,17 +1,16 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { getToDoList } from "../http";
-import type { IToDoListItem } from "../interfaces/IToDoListItem";
 import AddToDoItemForm from "./AddToDoItemForm";
 import ToDoListItem from "./ToDoListItem";
 import Modal from "./Modal";
+import { ToDoListContext } from "../store/ToDoListContext";
+import ErrorBanner from "./ErrorBanner";
 
 export default function ToDoList() {
-    const [listItems, setListItems] = useState<IToDoListItem[]>([]);
+    const toDoListCtx = useContext(ToDoListContext)
     const [isLoading, setIsLoading] = useState<boolean>(true);
 
     const [addItemDialogOpen, setAddItemDialogOpen] = useState<boolean>(false);
-    const [parentToDoListItems, setParentToDoListItems] = useState<IToDoListItem[]>([]);
-
 
     useEffect(() => {
         setIsLoading(true);
@@ -19,11 +18,16 @@ export default function ToDoList() {
         async function fetchToDoListItems(): Promise<void> {
             try {
                 const toDoItems = await getToDoList();
+                toDoListCtx.setToDoListItems(toDoItems);
                 setIsLoading(false);
-                setListItems(toDoItems);
-                setParentToDoListItems(toDoItems.filter(x => !x.parentToDoListItemId));
             }
-            catch {
+            catch (error) {
+                if (error instanceof Error) {
+                    toDoListCtx.onError(error);
+                } else {
+                    toDoListCtx.onError(new Error('An unexpected error occurred'));
+                }
+
                 setIsLoading(false);
             }
         }
@@ -35,14 +39,26 @@ export default function ToDoList() {
         setAddItemDialogOpen(true);
     }
 
-    return (
-        <div>
-            <button className="bg-blue-500" onClick={handleAddNewTaskClick}>Add New Task</button>
-            {listItems.map(item => <ToDoListItem {...item} key={item.id} />)}
+    const parentToDoItems = toDoListCtx.toDoListItems.filter(x => !x.parentToDoListItemId);
 
-            <Modal dialogOpen={addItemDialogOpen} setDialogOpen={setAddItemDialogOpen}>
-                <AddToDoItemForm dialogOpened={addItemDialogOpen} setDialogOpened={setAddItemDialogOpen} parentToDoListItems={parentToDoListItems} />
-            </Modal>
-        </div>
+    return (
+        <>
+            <ErrorBanner />
+            {isLoading && <p>Loading...</p>}
+            {!isLoading && (
+                <>
+                    <div className="flex justify-end pb-5">
+                        <button className="bg-blue-500 rounded-sm text-white font-semibold w-30 h-10 cursor-pointer justify-end" onClick={handleAddNewTaskClick}>Add New Task</button>
+                    </div>
+
+                    {parentToDoItems.length === 0 && <div>Click the "Add New Task" button to add a new ToDo List Task!</div>}
+                    {parentToDoItems.length > 0 && parentToDoItems.map(item => <ToDoListItem {...item} key={item.id} />)}
+
+                    <Modal dialogOpen={addItemDialogOpen} setDialogOpen={setAddItemDialogOpen}>
+                        {addItemDialogOpen && <AddToDoItemForm dialogOpened={addItemDialogOpen} setDialogOpened={setAddItemDialogOpen} />}
+                    </Modal>
+                </>
+            )}
+        </>
     )
 }

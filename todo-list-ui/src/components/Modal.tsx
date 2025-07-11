@@ -18,7 +18,7 @@ export default function Modal(props: PropsWithChildren<{ dialogOpen: boolean, se
 
 
     return (
-        <dialog ref={dialogRef} onCancel={handleDialogOnCancel}>
+        <dialog className="w-md fixed m-auto rounded-sm" ref={dialogRef} onCancel={handleDialogOnCancel}>
             {props.children}
         </dialog>
     );
