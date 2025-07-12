@@ -75,7 +75,7 @@ export default function ToDoListItem(props: IToDoListItem) {
                             <span>{props.taskDetails}</span>
                         </div>}
                         {childTasks.length > 0 && <div className="cursor-default flex flex-col">
-                            <label className="text-left font-semibold me-2">Children Tasks:</label>
+                            <label className="text-left font-semibold me-2">Child Tasks:</label>
                             {childTasks.map((childItem) => <ToDoListItem {...childItem} key={childItem.id} />)}
                         </div>}
                     </div>
