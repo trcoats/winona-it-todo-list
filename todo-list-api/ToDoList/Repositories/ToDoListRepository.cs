@@ -1,29 +1,33 @@
 using Microsoft.EntityFrameworkCore;
-using System.Linq.Expressions;
 using ToDoList.Data;
 using ToDoList.Models;
 
 namespace ToDoList.Repositories;
 
-public class ToDoListRepository : IToDoListRepository
+public class ToDoListRepository(ToDoListInMemoryDbContext dbContext, ILogger<ToDoListRepository> logger) : IToDoListRepository
 {
-    private readonly ToDoListInMemoryDbContext _dbContext;
-    
-    public ToDoListRepository(ToDoListInMemoryDbContext dbContext)
-    {
-        _dbContext = dbContext;
-    }
-    
     public async Task<IEnumerable<ToDoListItem>> GetToDoListItems()
     {
-        return await _dbContext.ToDoItems.ToListAsync();
+        var trace = $"{nameof(ToDoListRepository)}.{nameof(GetToDoListItems)}";
+
+        try
+        {
+            return await dbContext.ToDoItems.ToListAsync();
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "{trace} - An error occurred while attempting to retrieve to do list items", trace);
+            throw;
+        }
     }
 
     public async Task<ToDoListItem?> GetToDoListItemById(Guid id)
     {
+        var trace = $"{nameof(ToDoListRepository)}.{nameof(GetToDoListItemById)}";
+
         try
         {
-            var toDoListItem = await _dbContext.ToDoItems.FindAsync(id);
+            var toDoListItem = await dbContext.ToDoItems.FindAsync(id);
 
             if (toDoListItem == null)
                 throw new Exception($"To Do List Item with id {id} not found");
@@ -32,50 +36,60 @@ public class ToDoListRepository : IToDoListRepository
         }
         catch (Exception ex)
         {
+            logger.LogError(ex, "{trace} - An error occurred while attempting to retrieve with id {id}", trace, id);
             return null;
         }
     }
 
     public async Task<bool> AddToDoListItem(ToDoListItem item)
     {
+        var trace = $"{nameof(ToDoListRepository)}.{nameof(AddToDoListItem)}";
+
         try
         {
-            await _dbContext.ToDoItems.AddAsync(item);
-            await _dbContext.SaveChangesAsync();
+            await dbContext.ToDoItems.AddAsync(item);
+            await dbContext.SaveChangesAsync();
             return true;
         }
         catch (Exception ex)
         {
-            // Log and such
+            logger.LogError(ex, "{trace} - An error occurred while attempting to add new ToDo List Item", trace);
             return false;
         }
     }
 
     public async Task<bool> UpdateToDoListItem(ToDoListItem item)
     {
+        var trace = $"{nameof(ToDoListRepository)}.{nameof(UpdateToDoListItem)}";
+
         try
         {
-            _dbContext.Update(item);
-            await _dbContext.SaveChangesAsync();
+            dbContext.Update(item);
+            await dbContext.SaveChangesAsync();
 
             return true;
         }
         catch (Exception ex)
         {
+            logger.LogError(ex, "{trace} - An error occurred while attempting to update item with id {id}", trace, item.Id);
             return false;
         }
     }
 
     public async Task<bool> DeleteToDoListItem(ToDoListItem item)
     {
+        var trace = $"{nameof(ToDoListRepository)}.{nameof(DeleteToDoListItem)}";
+
         try
         {
-            _dbContext.Remove(item);
-            await _dbContext.SaveChangesAsync();
+            dbContext.Remove(item);
+            await dbContext.SaveChangesAsync();
+            
             return true;
         }
         catch (Exception ex)
         {
+            logger.LogError(ex, "{trace} - An error occurred while attempting to delete item with id {id}", trace, item.Id);
             return false;
         }
     }

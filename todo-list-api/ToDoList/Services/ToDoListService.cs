@@ -3,33 +3,24 @@ using ToDoList.Repositories;
 
 namespace ToDoList.Services;
 
-public class ToDoListService : IToDoListService
+public class ToDoListService(IToDoListRepository toDoListRepository, ILogger<ToDoListService> logger) : IToDoListService
 {
-    private readonly IToDoListRepository _toDoListRepository;
-    private readonly ILogger<ToDoListService> _logger;
-
-    public ToDoListService(IToDoListRepository toDoListRepository, ILogger<ToDoListService> logger)
-    {
-        _toDoListRepository = toDoListRepository;
-        _logger = logger;
-    }
-    
     public Task<IEnumerable<ToDoListItem>> GetToDoListItems()
     {
-        return _toDoListRepository.GetToDoListItems();
+        return toDoListRepository.GetToDoListItems();
     }
 
     public async Task<string> AddToDoListItem(CreateToDoListItemModel item)
     {
         var toDoListItemEntity = new ToDoListItem(item);
 
-        await _toDoListRepository.AddToDoListItem(toDoListItemEntity);
+        await toDoListRepository.AddToDoListItem(toDoListItemEntity);
         return toDoListItemEntity.Id.ToString();
     }
 
     public async Task<bool> MarkToDoListItemCompleted(Guid id)
     {
-        var allToDoListItems = await _toDoListRepository.GetToDoListItems();
+        var allToDoListItems = await toDoListRepository.GetToDoListItems();
         if (allToDoListItems == null || !allToDoListItems.Any())
             return false;
 
@@ -39,7 +30,7 @@ public class ToDoListService : IToDoListService
             return false;
 
         toDoListItem.IsCompleted = true;
-        await _toDoListRepository.UpdateToDoListItem(toDoListItem);
+        await toDoListRepository.UpdateToDoListItem(toDoListItem);
 
         if (toDoListItem.ParentToDoListItemId != null)
         {
@@ -50,9 +41,19 @@ public class ToDoListService : IToDoListService
                 if (parentListItem != null)
                 {
                     parentListItem.IsCompleted = true;
-                    await _toDoListRepository.UpdateToDoListItem(parentListItem);
+                    await toDoListRepository.UpdateToDoListItem(parentListItem);
                 }
 
+            }
+        }
+
+        if (allToDoListItems.Any(x => x.ParentToDoListItemId == id))
+        {
+            var childrenListItems = allToDoListItems.Where(x => x.ParentToDoListItemId == id);
+            foreach(var child in childrenListItems)
+            {
+                child.IsCompleted = true;
+                await toDoListRepository.UpdateToDoListItem(child);
             }
         }
 
@@ -61,7 +62,7 @@ public class ToDoListService : IToDoListService
 
     public async Task<bool> DeleteToDoListItemById(Guid id)
     {
-        var allToDoListItems = await _toDoListRepository.GetToDoListItems();
+        var allToDoListItems = await toDoListRepository.GetToDoListItems();
 
         if (allToDoListItems == null || !allToDoListItems.Any())
             return false;
@@ -70,14 +71,14 @@ public class ToDoListService : IToDoListService
         if (toDoListItem == null)
             return false;
 
-        await _toDoListRepository.DeleteToDoListItem(toDoListItem);
+        await toDoListRepository.DeleteToDoListItem(toDoListItem);
 
         var childToDoListItems = allToDoListItems.Where(x => x.ParentToDoListItemId == id);
         if (childToDoListItems != null && childToDoListItems.Any())
         {
             foreach (var childItem in childToDoListItems)
             {
-                await _toDoListRepository.DeleteToDoListItem(childItem);
+                await toDoListRepository.DeleteToDoListItem(childItem);
             }
         }
 
