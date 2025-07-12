@@ -64,7 +64,7 @@ export default function AddToDoItemForm(props: { dialogOpened: boolean, setDialo
         parentToDoItemSelect = (
             <div className="flex flex-col mb-2">
                 <label className="text-left font-semibold">Parent Task</label>
-                <select className="border-1 rounded-xs w-1/2 px-1" value={parentTaskId} onChange={(e) => handleParentTaskIdChange(e)}>
+                <select className="border-1 rounded-xs px-1" value={parentTaskId} onChange={(e) => handleParentTaskIdChange(e)}>
                     <option value={undefined}></option>
                     {parentToDoItems.map(x => {
                         return <option value={x.id} key={x.id}>{x.toDoTask}</option>
