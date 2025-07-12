@@ -76,6 +76,22 @@ export function toDoListReducer(state: { items: IToDoListItem[], error: Error | 
                 stateCopy.items = [...stateCopy.items];
             }
         }
+
+        if (stateCopy.items.some(x => x.parentToDoListItemId === action.payload)) {
+            const childItemIndexes: number[] = [];
+            stateCopy.items.forEach((x, i) => {
+                if (x.parentToDoListItemId)
+                    childItemIndexes.push(i);
+            });
+
+            childItemIndexes.forEach(x => {
+                const childItem = stateCopy.items[x];
+                childItem.isCompleted = true;
+                stateCopy.items.splice(x, 1, childItem);
+            });
+
+            stateCopy.items = [...stateCopy.items];
+        }
     }
 
     if (action.type === 'DELETE_ITEM') {
