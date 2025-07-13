@@ -1,4 +1,4 @@
-To Do List demo application built with .NET 9, React w/ Typescript, and Tailwind CSS.
+To Do List demo application built with .NET 9, React w/ Typescript, and Bootstrap.
 
 To Run:
 1. Clone repository.
