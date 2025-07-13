@@ -14,7 +14,7 @@ public class ToDoListItem
         Deadline = model.Deadline;
         IsCompleted = model.IsCompleted;
         TaskDetails = model.TaskDetails;
-        ParentToDoListItemId = model.ParentToDoListItemId;
+        ParentToDoListItemId = string.IsNullOrWhiteSpace(model.ParentToDoListItemId) ? null : new Guid(model.ParentToDoListItemId);
     }
 
     public Guid Id { get; set; }

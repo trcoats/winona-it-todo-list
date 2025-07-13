@@ -6,6 +6,6 @@
         public DateTime Deadline { get; set; }
         public bool IsCompleted { get; set; }
         public string? TaskDetails { get; set; }
-        public Guid? ParentToDoListItemId { get; set; }
+        public string? ParentToDoListItemId { get; set; }
     }
 }
