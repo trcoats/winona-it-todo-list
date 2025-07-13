@@ -4,5 +4,5 @@ export interface IToDoListItem {
     deadline: Date,
     isCompleted: boolean,
     taskDetails?: string,
-    parentToDoListItemId?: string
+    parentToDoListItemId: string | null;
 }

@@ -44,11 +44,9 @@ export default function ToDoListItem(props: IToDoListItem) {
         setShowDetails(!showDetails);
     }
 
-    let classNames = "border-1 rounded-sm mb-3 py-3 px-4 flex align-baseline";
-    if (props.isCompleted) {
-        classNames += " bg-green-200";
-    } else if (moment().isAfter(moment(props.deadline), 'date')) {
-        classNames += " bg-red-200";
+    let classNames = "card p-3 mt-2";
+    if (moment().isAfter(moment(props.deadline), 'date')) {
+        classNames += " bg-warning";
     }
 
     if ((props.taskDetails || childTasks.length > 0))
@@ -56,35 +54,41 @@ export default function ToDoListItem(props: IToDoListItem) {
 
     return (
         <div className={classNames} onClick={(e) => handleCardClick(e)}>
-            <div className="flex flex-col w-3/4">
-                <div className="flex">
-                    <label className="font-semibold me-2">To Do:</label>
-                    <h4>{props.toDoTask}</h4>
+            <div className="d-flex align-items-baseline">
+                <div className="d-flex align-items-center justify-content-center col-1">
+                    {moment().isAfter(moment(props.deadline), 'date') && <span className="fa-solid fa-exclamation fa-2x"></span>}
+                    {props.isCompleted && <span className="fa-solid fa-check text-success fa-2x"></span>}
                 </div>
-                <div className="flex">
-                    <label className="font-semibold me-2">Deadline:</label>
-                    <p>{moment(props.deadline).format('MM/DD/YYYY')}</p>
-                </div>
-                {!showDetails && props.taskDetails && childTasks.length > 0 && <span className="flex italic">Click card to view more details and child tasks</span>}
-                {!showDetails && !props.taskDetails && childTasks.length > 0 && <span className="flex italic">Click card to view child tasks</span>}
-                {!showDetails && props.taskDetails && childTasks.length === 0 && <span className="flex italic">Click card to view more details</span>}
-                {showDetails && (props.taskDetails || childTasks.length > 0) && (
-                    <div className="pt-5">
-                        {props.taskDetails && <div className="flex">
-                            <label className="font-semibold me-2">Details:</label>
-                            <span>{props.taskDetails}</span>
-                        </div>}
-                        {childTasks.length > 0 && <div className="cursor-default flex flex-col">
-                            <label className="text-left font-semibold me-2">Child Tasks:</label>
-                            {childTasks.map((childItem) => <ToDoListItem {...childItem} key={childItem.id} />)}
-                        </div>}
+                <div className="d-flex flex-column col-8">
+                    <div className="d-flex">
+                        <label className="fw-bold me-2">To Do:</label>
+                        <span>{props.toDoTask}</span>
                     </div>
-                )}
+                    <div className="d-flex">
+                        <label className="fw-bold me-2">Deadline:</label>
+                        <p>{moment(props.deadline).format('MM/DD/YYYY')}</p>
+                    </div>
+                    {!showDetails && props.taskDetails && childTasks.length > 0 && <span className="d-flex fst-italic">Click card to view more details and child tasks</span>}
+                    {!showDetails && !props.taskDetails && childTasks.length > 0 && <span className="d-flex fst-italic">Click card to view child tasks</span>}
+                    {!showDetails && props.taskDetails && childTasks.length === 0 && <span className="d-flex fst-italic">Click card to view more details</span>}
+                    {showDetails && (props.taskDetails || childTasks.length > 0) && (
+                        <div className="pt-1">
+                            {props.taskDetails && <div className="d-flex">
+                                <label className="fw-bold me-2">Details:</label>
+                                <span>{props.taskDetails}</span>
+                            </div>}
+                            {childTasks.length > 0 && <div className="d-flex flex-column">
+                                <label className="fw-bold">Child Tasks:</label>
+                                {childTasks.map((childItem) => <ToDoListItem {...childItem} key={childItem.id} />)}
+                            </div>}
+                        </div>
+                    )}
+                </div>
+                <div className="d-flex justify-content-end w-100">
+                    {!props.isCompleted && <button className="btn btn-success me-3" onClick={handleCompleteClick}><span className="fa-solid fa-check me-2"></span> Complete</button>}
+                    <button className="btn btn-danger" onClick={(e) => handleDeleteClick(e)}><span className="fa-solid fa-trash me-2"></span> Delete</button>
+                </div>
             </div>
-            <div className="flex justify-end w-100">
-                {!props.isCompleted && <button className="cursor-pointer bg-green-500 rounded-xs font-semibold h-10 w-1/2" onClick={handleCompleteClick}>Complete</button>}
-                <button className="cursor-pointer ms-2 bg-red-500 rounded-xs text-white font-semibold h-10 w-1/2" onClick={(e) => handleDeleteClick(e)}>Delete</button>
-            </div>
-        </div>
+        </div >
     )
 }

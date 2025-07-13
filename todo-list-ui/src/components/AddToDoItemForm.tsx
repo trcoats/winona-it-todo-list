@@ -11,6 +11,7 @@ export default function AddToDoItemForm(props: { dialogOpened: boolean, setDialo
     const [taskDeadline, setTaskDeadline] = useState<string>('');
     const [parentTaskId, setParentTaskId] = useState<string | undefined>(undefined);
     const [taskDetails, setTaskDetails] = useState<string | undefined>(undefined);
+    const [dateError, setDateError] = useState<string | undefined>(undefined);
 
     const today = moment().format('YYYY-MM-DD');
     const parentToDoItems = toDoListCtx.toDoListItems.filter(x => !x.parentToDoListItemId && !x.isCompleted);
@@ -21,6 +22,19 @@ export default function AddToDoItemForm(props: { dialogOpened: boolean, setDialo
 
     function handleTaskDeadlineChange($event: React.ChangeEvent<HTMLInputElement>) {
         setTaskDeadline($event.target.value);
+    }
+
+    function handleTaskDeadlineBlur($event: React.FocusEvent<HTMLInputElement>) {
+        const inputDate = moment($event.target.value, "YYYY-MM-DD");
+        const validDate = inputDate.isValid();
+
+        if (!validDate) {
+            setDateError("Date not in valid format");
+        } else if (moment().isAfter(inputDate, 'date')) {
+            setDateError("Date must be in the future");
+        } else {
+            setDateError(undefined);
+        }
     }
 
     function handleParentTaskIdChange($event: React.ChangeEvent<HTMLSelectElement>) {
@@ -39,7 +53,7 @@ export default function AddToDoItemForm(props: { dialogOpened: boolean, setDialo
             deadline: moment(taskDeadline).toDate(),
             isCompleted: false,
             taskDetails: taskDetails,
-            parentToDoListItemId: parentTaskId
+            parentToDoListItemId: parentTaskId ?? ''
         };
 
         try {
@@ -62,9 +76,9 @@ export default function AddToDoItemForm(props: { dialogOpened: boolean, setDialo
     let parentToDoItemSelect = null;
     if (parentToDoItems?.length > 0) {
         parentToDoItemSelect = (
-            <div className="flex flex-col mb-2">
-                <label className="text-left font-semibold">Parent Task</label>
-                <select className="border-1 rounded-xs px-1" value={parentTaskId} onChange={(e) => handleParentTaskIdChange(e)}>
+            <div className="d-flex flex-column align-items-start mb-2">
+                <label className="fw-bold">Parent Task</label>
+                <select className="form-select" value={parentTaskId} onChange={(e) => handleParentTaskIdChange(e)}>
                     <option value={undefined}></option>
                     {parentToDoItems.map(x => {
                         return <option value={x.id} key={x.id}>{x.toDoTask}</option>
@@ -75,24 +89,26 @@ export default function AddToDoItemForm(props: { dialogOpened: boolean, setDialo
     }
 
     return (
-        <form className="flex flex-col p-4">
-            <div className="flex flex-col mb-2">
-                <label className="text-left font-semibold">To Do Task<span className="ms-1 text-red-500">*</span></label>
-                <input className="border-1 rounded-xs px-1" type="text" placeholder="Task" value={toDoTask} onChange={(e) => handleToDoTaskChange(e)} />
+        <form className="d-flex flex-column p-4">
+            <div className="d-flex flex-column align-items-start mb-2">
+                <label className="fw-bold">To Do Task<span className="ms-1 text-danger">*</span></label>
+                <input className="form-control" type="text" placeholder="Task" value={toDoTask} onChange={(e) => handleToDoTaskChange(e)} />
             </div>
-            <div className="flex flex-col mb-2">
-                <label className="text-left font-semibold">Deadline<span className="ms-1 text-red-500">*</span></label>
-                <input className="border-1 rounded-xs w-1/2 px-1" type="date" min={today} value={taskDeadline} onChange={(e) => handleTaskDeadlineChange(e)} />
+            <div className="d-flex flex-column align-items-start mb-2">
+                <label className="text-left fw-bold">Deadline<span className="ms-1 text-danger">*</span></label>
+                <input className="form-control" type="date" min={today} value={taskDeadline} onChange={(e) => handleTaskDeadlineChange(e)} onBlur={(e) => handleTaskDeadlineBlur(e)} />
             </div>
             {parentToDoItemSelect}
-            <div className="flex flex-col justify-start mb-8">
-                <label className="text-left font-semibold">Task Details</label>
-                <textarea className="border-1 rounded-xs px-1" value={taskDetails} onChange={(e) => handleTaskDetailsChange(e)}></textarea>
+            <div className="d-flex flex-column align-items-start mb-4">
+                <label className="fw-bold">Task Details</label>
+                <textarea className="form-control" value={taskDetails} onChange={(e) => handleTaskDetailsChange(e)}></textarea>
             </div>
 
-            <div className="flex justify-between mb-2">
-                <button className="cursor-pointer w-7/16 h-10 bg-white border-1 border-blue-500 text-blue-500 font-semibold rounded-sm" onClick={(e) => handleCancelClick(e)}>Cancel</button>
-                <button disabled={!toDoTask || !taskDeadline} className="cursor-pointer w-7/16 bg-blue-500 font-semibold text-white rounded-sm disabled:bg-gray-200 disabled:text-black disabled:cursor-default" onClick={(e) => handleSubmitClick(e)}>Submit</button>
+            {dateError && <div className="text-danger">{dateError}</div>}
+
+            <div className="d-flex justify-content-between mb-2">
+                <button className="btn btn-outline-primary" onClick={(e) => handleCancelClick(e)}>Cancel</button>
+                <button disabled={!toDoTask || !taskDeadline || !!dateError} className="btn btn-primary" onClick={(e) => handleSubmitClick(e)}>Submit</button>
             </div>
         </form>
     )

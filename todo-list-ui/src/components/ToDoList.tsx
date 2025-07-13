@@ -47,8 +47,8 @@ export default function ToDoList() {
             {isLoading && <p>Loading...</p>}
             {!isLoading && (
                 <>
-                    <div className="flex justify-end pb-5">
-                        <button className="bg-blue-500 rounded-sm text-white font-semibold w-30 h-10 cursor-pointer justify-end" onClick={handleAddNewTaskClick}>Add New Task</button>
+                    <div className="d-flex justify-content-end pb-4">
+                        <button className="btn btn-primary" onClick={handleAddNewTaskClick}>Add New Task</button>
                     </div>
 
                     {parentToDoItems.length === 0 && <div>Click the "Add New Task" button to add a new ToDo List Task!</div>}
